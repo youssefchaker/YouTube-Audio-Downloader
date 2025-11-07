@@ -14,7 +14,7 @@ This Python script downloads specific time ranges of audio from YouTube videos.
     ```
     pip install -r requirements.txt
     ```
-3.  Download FFmpeg from [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html) and extract it.
+3.  Download FFmpeg (ffmpeg-git-essentials.7z) from [https://www.gyan.dev/ffmpeg/builds](https://www.gyan.dev/ffmpeg/builds) and extract it.
 4.  Place the extracted FFmpeg folder in the root directory of the project. The folder structure should look like this:
     ```
     Youtube_Audio_Segmentation/
