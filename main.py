@@ -194,6 +194,7 @@ def download_playlist(playlist_url):
 
 if __name__ == "__main__":
     while True:
+        print("Welcome to youtube audio downloader!")
         print("Choose an option:")
         print("1. Download full video audio")
         print("2. Download video audio segment")
@@ -211,7 +212,7 @@ if __name__ == "__main__":
             try:
                 print(f"Downloading full audio from {youtube_url}...")
                 output_filename = download_full_audio(youtube_url)
-                print(f"Successfully downloaded {output_filename}")
+                print(f"Successfully downloaded full audio to{output_filename}")
             except Exception as e:
                 print(f"Error downloading {youtube_url}: {e}")
 
@@ -242,7 +243,7 @@ if __name__ == "__main__":
             try:
                 print(f"Downloading audio segment from {youtube_url} between {start_time_str} and {end_time_str}...")
                 output_filename = download_audio_segment(youtube_url, start_time_str, end_time_str)
-                print(f"Successfully downloaded {output_filename}")
+                print(f"Successfully downloaded audio segment to{output_filename}")
             except Exception as e:
                 print(f"Error downloading {youtube_url}: {e}")
 

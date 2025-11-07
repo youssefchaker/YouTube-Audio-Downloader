@@ -1,6 +1,6 @@
 # YouTube Audio Downloader
 
-This Python script allows you to download audio from YouTube videos, either the full audio or specific segments.
+This Python script allows you to download audio from YouTube videos, either full audio, specific segments or an entire playlist.
 
 ## Features
 
