@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import yt_dlp
 import ffmpeg
 import os
@@ -7,7 +6,6 @@ import shutil
 import re
 import glob
 
-# Find ffmpeg path dynamically
 ffmpeg_path = (glob.glob(os.path.join(os.path.dirname(__file__), 'ffmpeg-*-essentials_build', 'ffmpeg-*-essentials_build', 'bin')) or
                glob.glob(os.path.join(os.path.dirname(__file__), 'ffmpeg-*-essentials_build', 'bin')))
 
@@ -139,12 +137,68 @@ def validate_time(time_str):
         return None
 
 
+def is_valid_youtube_playlist_url(url):
+    """
+    Checks if the given URL is a valid YouTube playlist URL.
+    """
+    playlist_regex = re.compile(r'^(https?://)?(www\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)')
+    return re.match(playlist_regex, url) is not None
+
+def download_playlist(playlist_url):
+    """
+    Downloads the audio of all videos in a YouTube playlist.
+
+    Args:
+        playlist_url (str): The URL of the YouTube playlist.
+    """
+    output_dir = "output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    ydl_opts = {
+        'extract_flat': True,
+        'quiet': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(playlist_url, download=False)
+        playlist_title = info_dict.get('title', 'untitled_playlist')
+        sanitized_playlist_title = "".join(c for c in playlist_title if c.isalnum() or c in (' ', '-')).rstrip()
+        playlist_output_dir = os.path.join(output_dir, sanitized_playlist_title)
+
+    if not os.path.exists(playlist_output_dir):
+        os.makedirs(playlist_output_dir)
+
+    pbar = tqdm(total=len(info_dict['entries']), unit='video', desc=f"Downloading playlist: {playlist_title}")
+
+    def progress_hook(d):
+        if d['status'] == 'finished':
+            pbar.update(1)
+
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": os.path.join(playlist_output_dir, "%(title)s.%(ext)s"),
+        "progress_hooks": [progress_hook],
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
+        'ignoreerrors': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([playlist_url])
+    
+    pbar.close()
+    return playlist_output_dir
+
+
 if __name__ == "__main__":
     while True:
         print("Choose an option:")
         print("1. Download full video audio")
         print("2. Download video audio segment")
-        print("3. Exit")
+        print("3. Download playlist audio")
+        print("4. Exit")
         choice = input("Enter your choice: ")
 
         if choice == '1':
@@ -193,6 +247,20 @@ if __name__ == "__main__":
                 print(f"Error downloading {youtube_url}: {e}")
 
         elif choice == '3':
+            while True:
+                playlist_url = input("Enter the YouTube playlist URL: ")
+                if is_valid_youtube_playlist_url(playlist_url):
+                    break
+                else:
+                    print("Invalid YouTube playlist URL. Please enter a valid URL.")
+            try:
+                print(f"Downloading playlist from {playlist_url}...")
+                playlist_dir = download_playlist(playlist_url)
+                print(f"Successfully downloaded playlist to {playlist_dir}")
+            except Exception as e:
+                print(f"Error downloading playlist {playlist_url}: {e}")
+
+        elif choice == '4':
             break
         else:
             print("Invalid choice. Please try again.")
