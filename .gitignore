@@ -1,0 +1,12 @@
+# Temporary files
+temp/
+
+# Audio files
+*.mp3
+
+#FFmpeg
+ffmpeg-*-git-222127418b-essentials_build
+
+build/
+dist/
+.venv/
