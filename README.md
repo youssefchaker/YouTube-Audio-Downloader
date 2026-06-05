@@ -1,42 +1,38 @@
-# YouTube Audio Downloader
+# YouTube Audio Downloader 🎵
 
-This Python script allows you to download audio from YouTube videos, either full audio, specific segments or an entire playlist.
+A fast, modern, and user-friendly desktop application for downloading high-quality audio from YouTube. Built with Python and CustomTkinter, this tool allows you to download full tracks, precise audio clips, or entire playlists with ease—no coding required.
 
-## Features
+## ✨ Features
 
-*   Download full audio from a YouTube video.
-*   Download specific audio segments from a YouTube video.
-*   Download audio from an entire YouTube playlist.
-*   Command-line interface for easy interaction.
+* **Full Audio Download:** Paste a YouTube URL and instantly download the highest quality audio as an MP3.
+* **Segment Downloading:** Only want a specific part of a video? Enter start and end timestamps (HH:MM:SS) to extract exact audio clips without having to download or process the whole video manually.
+* **Playlist Support:** Download entire YouTube playlists. The app automatically creates an organized folder for the playlist and tracks the download progress of each video.
+* **Modern GUI:** A clean, dark-mode-ready interface that stays responsive even while heavy background downloads are happening.
+* **Live Progress Tracking:** Built-in progress bar and status text so you always know exactly what the application is doing.
 
-## Requirements
+---
 
-*   Python 3.6+
-*   FFmpeg
+## 🚀 Getting Started (Using the Release)
 
-## Installation
+You do not need to install Python or understand code to run this application. Just follow these simple steps:
 
-1.  Clone this repository or download the files.
-2.  Install the required Python packages:
-    ```
-    pip install -r requirements.txt
-    ```
-3.  Download the latest FFmpeg essentials build from [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/).
-4.  Extract the downloaded file and place the `ffmpeg-*-essentials_build` folder (e.g., `ffmpeg-2025-11-06-git-222127418b-essentials_build`) into the root of the project directory. The script is configured to dynamically locate FFmpeg within this folder.
+### 1. Download the App
+Download the app release `YouTube_Audio_Downloader_v1.0.exe`.
 
-## Usage
+### 2. Install FFmpeg (Crucial Step)
+This application uses FFmpeg in the background to process, trim, and format the audio files. It will not work without it.
 
-Run the script from your terminal:
+Download the latest FFmpeg essentials build from [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/).
+Extract the downloaded file and place the `ffmpeg-*-essentials_build` folder (e.g., `ffmpeg-2025-11-06-git-222127418b-essentials_build`) besides the exe file.
 
-```
-python main.py
-```
+### 3. Run the App
+* Double-click `YouTube_Audio_Downloader_v1.0.exe` to launch the application.
+* Select your desired tab at the top (Full Audio, Segment, or Playlist).
+* Paste your YouTube URL, configure your times (if using the Segment tab), and click **Download**.
 
-The script will present you with a menu of options:
+All downloaded MP3 files will automatically be saved into an `output` folder that the app creates right next to the `.exe`.
 
-1.  **Download full video audio**: Prompts for a YouTube video URL and downloads the entire audio track.
-2.  **Download video audio segment**: Prompts for a YouTube video URL, a start time (HH:MM:SS), and an end time (HH:MM:SS) to download a specific audio segment.
-3.  **Download playlist audio**: Prompts for a YouTube playlist URL and downloads the audio for all videos in the playlist into a new folder within the `output` directory, named after the playlist.
-4.  **Exit**: Exits the application.
+---
 
-The downloaded audio files will be saved in the `output` directory. For segments, filenames are formatted as `<video_title>_<start_time>_<end_time>.mp3`. For full video audio, it's `<video_title>.mp3`. For playlists, a new folder named after the playlist will be created in `output`, containing `<video_title>.mp3` for each video.
+## Preview
+<img width="640" height="480" alt="YouTubeAudioDownloader2026-06-0516-56-29-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/47d1f039-9497-4f29-9fe5-257fdd8f013f" />
