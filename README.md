@@ -35,4 +35,5 @@ All downloaded MP3 files will automatically be saved into an `output` folder tha
 ---
 
 ## Preview
-<img width="640" height="480" alt="YouTubeAudioDownloader2026-06-0516-56-29-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/47d1f039-9497-4f29-9fe5-257fdd8f013f" />
+<img width="800" height="431" alt="RS2Tracker2026-06-1013-20-00-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/505bf4a2-261b-48e5-b9f3-80ffc43d582a" />
+
