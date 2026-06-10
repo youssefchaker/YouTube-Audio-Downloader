@@ -5,8 +5,9 @@ temp/
 *.mp3
 
 #FFmpeg
-ffmpeg-*-git-222127418b-essentials_build
+ffmpeg-*
 
 build/
 dist/
 .venv/
+output/

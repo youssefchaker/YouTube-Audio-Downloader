@@ -25,8 +25,6 @@ else:
 
 # --- VALIDATION FUNCTIONS ---
 def is_valid_youtube_url(url):
-    if 'list=' in url:
-        return False
     youtube_regex = re.compile(
         r'^(https?://)?(www\.)?'
         r'(youtube|youtu|youtube-nocookie)\.(com|be)/'
@@ -46,14 +44,21 @@ def is_valid_youtube_playlist_url(url):
     playlist_regex = re.compile(r'^(https?://)?(www\.)?youtube\.com/playlist\?list=([a-zA-Z0-9_-]+)')
     return re.match(playlist_regex, url) is not None
 
+def strip_playlist_param(url):
+    """Remove playlist parameters from a YouTube video URL."""
+    # Remove &list=... and &index=... parameters
+    cleaned = re.sub(r'&list=[^&]+', '', url)
+    cleaned = re.sub(r'&index=\d+', '', cleaned)
+    return cleaned
+
 
 # --- MAIN GUI APP ---
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("YouTube Audio Downloader")
-        self.geometry("600x450") 
+        self.title("YouTube Downloader")
+        self.geometry("600x520") 
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
 
@@ -69,19 +74,31 @@ class App(ctk.CTk):
         self.tabview = ctk.CTkTabview(self)
         self.tabview.pack(padx=20, pady=(10, 0), fill="both", expand=True)
 
-        self.tabview.add("Full Audio")
+        self.tabview.add("Full Download")
         self.tabview.add("Segment")
         self.tabview.add("Playlist")
 
-        # --- TAB 1: FULL AUDIO ---
-        self.lbl_url_full = ctk.CTkLabel(self.tabview.tab("Full Audio"), text="YouTube Video URL:", font=("Arial", 14, "bold"))
+        # --- TAB 1: FULL DOWNLOAD ---
+        self.lbl_url_full = ctk.CTkLabel(self.tabview.tab("Full Download"), text="YouTube Video URL:", font=("Arial", 14, "bold"))
         self.lbl_url_full.pack(pady=(20, 5), anchor="w", padx=20)
         
-        self.entry_url_full = ctk.CTkEntry(self.tabview.tab("Full Audio"), placeholder_text="https://www.youtube.com/watch?v=...")
+        self.entry_url_full = ctk.CTkEntry(self.tabview.tab("Full Download"), placeholder_text="https://www.youtube.com/watch?v=...")
         self.entry_url_full.pack(pady=5, padx=20, fill="x")
 
-        self.btn_full = ctk.CTkButton(self.tabview.tab("Full Audio"), text="Download Full Audio", command=self.download_full)
-        self.btn_full.pack(pady=30)
+        self.frame_format_full = ctk.CTkFrame(self.tabview.tab("Full Download"), fg_color="transparent")
+        self.frame_format_full.pack(pady=10, fill="x")
+        
+        self.lbl_format_full = ctk.CTkLabel(self.frame_format_full, text="Format:", font=("Arial", 12, "bold"))
+        self.lbl_format_full.pack(side="left", padx=(20, 10))
+        
+        self.format_var_full = ctk.StringVar(value="mp3")
+        self.radio_mp3_full = ctk.CTkRadioButton(self.frame_format_full, text="MP3 (Audio)", variable=self.format_var_full, value="mp3")
+        self.radio_mp3_full.pack(side="left", padx=10)
+        self.radio_mp4_full = ctk.CTkRadioButton(self.frame_format_full, text="MP4 (Video)", variable=self.format_var_full, value="mp4")
+        self.radio_mp4_full.pack(side="left", padx=10)
+
+        self.btn_full = ctk.CTkButton(self.tabview.tab("Full Download"), text="Download", command=self.download_full)
+        self.btn_full.pack(pady=20)
 
         # --- TAB 2: SEGMENT ---
         self.lbl_url_seg = ctk.CTkLabel(self.tabview.tab("Segment"), text="YouTube Video URL:", font=("Arial", 14, "bold"))
@@ -103,6 +120,18 @@ class App(ctk.CTk):
         self.entry_end = ctk.CTkEntry(self.frame_time, width=90, placeholder_text="00:01:00")
         self.entry_end.pack(side="left", padx=5)
 
+        self.frame_format_seg = ctk.CTkFrame(self.tabview.tab("Segment"), fg_color="transparent")
+        self.frame_format_seg.pack(pady=10, fill="x")
+        
+        self.lbl_format_seg = ctk.CTkLabel(self.frame_format_seg, text="Format:", font=("Arial", 12, "bold"))
+        self.lbl_format_seg.pack(side="left", padx=(20, 10))
+        
+        self.format_var_seg = ctk.StringVar(value="mp3")
+        self.radio_mp3_seg = ctk.CTkRadioButton(self.frame_format_seg, text="MP3 (Audio)", variable=self.format_var_seg, value="mp3")
+        self.radio_mp3_seg.pack(side="left", padx=10)
+        self.radio_mp4_seg = ctk.CTkRadioButton(self.frame_format_seg, text="MP4 (Video)", variable=self.format_var_seg, value="mp4")
+        self.radio_mp4_seg.pack(side="left", padx=10)
+
         self.btn_segment = ctk.CTkButton(self.tabview.tab("Segment"), text="Download Segment", command=self.download_segment)
         self.btn_segment.pack(pady=20)
 
@@ -113,8 +142,20 @@ class App(ctk.CTk):
         self.entry_url_pl = ctk.CTkEntry(self.tabview.tab("Playlist"), placeholder_text="https://www.youtube.com/playlist?list=...")
         self.entry_url_pl.pack(pady=5, padx=20, fill="x")
 
+        self.frame_format_pl = ctk.CTkFrame(self.tabview.tab("Playlist"), fg_color="transparent")
+        self.frame_format_pl.pack(pady=10, fill="x")
+        
+        self.lbl_format_pl = ctk.CTkLabel(self.frame_format_pl, text="Format:", font=("Arial", 12, "bold"))
+        self.lbl_format_pl.pack(side="left", padx=(20, 10))
+        
+        self.format_var_pl = ctk.StringVar(value="mp3")
+        self.radio_mp3_pl = ctk.CTkRadioButton(self.frame_format_pl, text="MP3 (Audio)", variable=self.format_var_pl, value="mp3")
+        self.radio_mp3_pl.pack(side="left", padx=10)
+        self.radio_mp4_pl = ctk.CTkRadioButton(self.frame_format_pl, text="MP4 (Video)", variable=self.format_var_pl, value="mp4")
+        self.radio_mp4_pl.pack(side="left", padx=10)
+
         self.btn_playlist = ctk.CTkButton(self.tabview.tab("Playlist"), text="Download Playlist", command=self.download_playlist)
-        self.btn_playlist.pack(pady=30)
+        self.btn_playlist.pack(pady=20)
 
         # --- GLOBAL PROGRESS BAR (Outside Tabs) ---
         self.frame_progress = ctk.CTkFrame(self, fg_color="transparent")
@@ -146,8 +187,31 @@ class App(ctk.CTk):
                     percent = d['downloaded_bytes'] / total
                     self.update_progress(percent, f"Downloading: {int(percent * 100)}%")
             elif d['status'] == 'finished':
-                self.update_progress(1.0, "Processing audio...")
+                self.update_progress(1.0, "Processing...")
         return hook
+
+    def get_ydl_opts(self, output_template, format_type, progress_hooks=None):
+        """Build yt-dlp options based on format type (mp3 or mp4)."""
+        opts = {
+            "outtmpl": output_template,
+        }
+        if progress_hooks:
+            opts["progress_hooks"] = progress_hooks
+            
+        if format_type == "mp3":
+            opts["format"] = "bestaudio/best"
+            opts["postprocessors"] = [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }]
+        else:  # mp4
+            opts["format"] = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+            opts["postprocessors"] = [{
+                "key": "FFmpegVideoConvertor",
+                "preferedformat": "mp4",
+            }]
+        return opts
 
     # --- DOWNLOAD HANDLERS ---
     def download_full(self):
@@ -158,7 +222,8 @@ class App(ctk.CTk):
 
         self.toggle_buttons(False)
         self.update_progress(0, "Starting download...")
-        threading.Thread(target=self.task_full, args=(url,), daemon=True).start()
+        format_type = self.format_var_full.get()
+        threading.Thread(target=self.task_full, args=(url, format_type), daemon=True).start()
 
     def download_segment(self):
         url = self.entry_url_seg.get().strip()
@@ -181,7 +246,8 @@ class App(ctk.CTk):
 
         self.toggle_buttons(False)
         self.update_progress(0, "Starting segment download...")
-        threading.Thread(target=self.task_segment, args=(url, start, end), daemon=True).start()
+        format_type = self.format_var_seg.get()
+        threading.Thread(target=self.task_segment, args=(url, start, end, format_type), daemon=True).start()
 
     def download_playlist(self):
         url = self.entry_url_pl.get().strip()
@@ -191,78 +257,89 @@ class App(ctk.CTk):
 
         self.toggle_buttons(False)
         self.update_progress(0, "Fetching playlist...")
-        threading.Thread(target=self.task_playlist, args=(url,), daemon=True).start()
+        format_type = self.format_var_pl.get()
+        threading.Thread(target=self.task_playlist, args=(url, format_type), daemon=True).start()
 
     # --- BACKGROUND THREADS ---
-    def task_full(self, url):
+    def task_full(self, url, format_type):
         try:
+            url = strip_playlist_param(url)
             output_dir = "output"
             os.makedirs(output_dir, exist_ok=True)
+            ext = "mp3" if format_type == "mp3" else "mp4"
 
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
-                "progress_hooks": [self.generate_progress_hook()],
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }],
-            }
+            ydl_opts = self.get_ydl_opts(
+                os.path.join(output_dir, f"%(title)s.{ext}"),
+                format_type,
+                [self.generate_progress_hook()]
+            )
+            
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(url, download=True)
                 video_title = info_dict.get('title', 'untitled')
                 sanitized_title = "".join(c for c in video_title if c.isalnum() or c in (' ', '-')).rstrip()
-                output_filename = os.path.join(output_dir, f"{sanitized_title}.mp3")
-                downloaded_file = ydl.prepare_filename(info_dict).replace(info_dict['ext'], 'mp3')
+                output_filename = os.path.join(output_dir, f"{sanitized_title}.{ext}")
+                downloaded_file = ydl.prepare_filename(info_dict).replace(info_dict['ext'], ext)
                 
                 if os.path.exists(downloaded_file) and downloaded_file != output_filename:
                     os.rename(downloaded_file, output_filename)
                 
             self.after(0, lambda: self.update_progress(1.0, "Ready"))
-            self.after(0, lambda: messagebox.showinfo("Success", f"Full audio saved to:\n{output_filename}"))
+            self.after(0, lambda: messagebox.showinfo("Success", f"Download saved to:\n{output_filename}"))
         except Exception as e:
             self.after(0, lambda err=e: messagebox.showerror("Download Error", str(err)))
             self.after(0, lambda: self.update_progress(0, "Ready"))
         finally:
             self.after(0, self.toggle_buttons, True)
 
-    def task_segment(self, url, start_time, end_time):
+    def task_segment(self, url, start_time, end_time, format_type):
         try:
+            url = strip_playlist_param(url)
             os.makedirs("temp", exist_ok=True)
             output_dir = "output"
             os.makedirs(output_dir, exist_ok=True)
+            ext = "mp3" if format_type == "mp3" else "mp4"
 
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": "temp/%(id)s.%(ext)s",
-                "progress_hooks": [self.generate_progress_hook()],
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }],
-            }
+            ydl_opts = self.get_ydl_opts(
+                "temp/%(id)s.%(ext)s",
+                format_type,
+                [self.generate_progress_hook()]
+            )
+            
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(url, download=True)
-                audio_file = ydl.prepare_filename(info_dict).replace(info_dict['ext'], 'mp3')
+                downloaded_file = ydl.prepare_filename(info_dict)
+                # Adjust extension for the actual output file
+                base_file = downloaded_file.rsplit('.', 1)[0]
+                media_file = f"{base_file}.{ext}"
                 video_title = info_dict.get('title', 'untitled')
 
-            self.after(0, lambda: self.update_progress(1.0, "Trimming audio..."))
+            self.after(0, lambda: self.update_progress(1.0, "Trimming..."))
             sanitized_title = "".join(c for c in video_title if c.isalnum() or c in (' ', '-')).rstrip()
-            output_filename = os.path.join(output_dir, f"{sanitized_title}_{start_time.replace(':', '-')}_{end_time.replace(':', '-')}.mp3")
+            output_filename = os.path.join(output_dir, f"{sanitized_title}_{start_time.replace(':', '-')}_{end_time.replace(':', '-')}.{ext}")
 
-            (
-                ffmpeg
-                .input(audio_file, ss=start_time, to=end_time)
-                .output(output_filename)
-                .overwrite_output()
-                .run(capture_stdout=True, capture_stderr=True)
-            )
+            if format_type == "mp3":
+                # Audio trim
+                (
+                    ffmpeg
+                    .input(media_file, ss=start_time, to=end_time)
+                    .output(output_filename, acodec='libmp3lame', ab='192k')
+                    .overwrite_output()
+                    .run(capture_stdout=True, capture_stderr=True)
+                )
+            else:
+                # Video trim - copy streams for speed, no re-encode
+                (
+                    ffmpeg
+                    .input(media_file, ss=start_time, to=end_time)
+                    .output(output_filename, c='copy')
+                    .overwrite_output()
+                    .run(capture_stdout=True, capture_stderr=True)
+                )
 
-            os.remove(audio_file)
+            os.remove(media_file)
             self.after(0, lambda: self.update_progress(1.0, "Ready"))
-            self.after(0, lambda: messagebox.showinfo("Success", f"Audio segment saved to:\n{output_filename}"))
+            self.after(0, lambda: messagebox.showinfo("Success", f"Segment saved to:\n{output_filename}"))
         except Exception as e:
             self.after(0, lambda err=e: messagebox.showerror("Download Error", str(err)))
             self.after(0, lambda: self.update_progress(0, "Ready"))
@@ -271,10 +348,11 @@ class App(ctk.CTk):
                 shutil.rmtree("temp", ignore_errors=True)
             self.after(0, self.toggle_buttons, True)
 
-    def task_playlist(self, url):
+    def task_playlist(self, url, format_type):
         try:
             output_dir = "output"
             os.makedirs(output_dir, exist_ok=True)
+            ext = "mp3" if format_type == "mp3" else "mp4"
 
             ydl_opts_info = {'extract_flat': True, 'quiet': True}
             with yt_dlp.YoutubeDL(ydl_opts_info) as ydl:
@@ -292,19 +370,15 @@ class App(ctk.CTk):
                 if d['status'] == 'finished':
                     completed_videos += 1
                     percent = completed_videos / total_videos
-                    self.update_progress(percent, f"Downloaded {completed_videos} of {total_videos} videos...")
+                    self.update_progress(percent, f"Downloaded {completed_videos} of {total_videos}...")
 
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "outtmpl": os.path.join(playlist_output_dir, "%(title)s.%(ext)s"),
-                "progress_hooks": [playlist_hook],
-                "postprocessors": [{
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                }],
-                'ignoreerrors': True,
-            }
+            ydl_opts = self.get_ydl_opts(
+                os.path.join(playlist_output_dir, f"%(title)s.{ext}"),
+                format_type,
+                [playlist_hook]
+            )
+            ydl_opts['ignoreerrors'] = True
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
 
