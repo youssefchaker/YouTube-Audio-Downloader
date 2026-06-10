@@ -46,7 +46,6 @@ def is_valid_youtube_playlist_url(url):
 
 def strip_playlist_param(url):
     """Remove playlist parameters from a YouTube video URL."""
-    # Remove &list=... and &index=... parameters
     cleaned = re.sub(r'&list=[^&]+', '', url)
     cleaned = re.sub(r'&index=\d+', '', cleaned)
     return cleaned
@@ -92,9 +91,9 @@ class App(ctk.CTk):
         self.lbl_format_full.pack(side="left", padx=(20, 10))
         
         self.format_var_full = ctk.StringVar(value="mp3")
-        self.radio_mp3_full = ctk.CTkRadioButton(self.frame_format_full, text="MP3 (Audio)", variable=self.format_var_full, value="mp3")
+        self.radio_mp3_full = ctk.CTkRadioButton(self.frame_format_full, text="Audio", variable=self.format_var_full, value="mp3")
         self.radio_mp3_full.pack(side="left", padx=10)
-        self.radio_mp4_full = ctk.CTkRadioButton(self.frame_format_full, text="MP4 (Video)", variable=self.format_var_full, value="mp4")
+        self.radio_mp4_full = ctk.CTkRadioButton(self.frame_format_full, text="Video", variable=self.format_var_full, value="mp4")
         self.radio_mp4_full.pack(side="left", padx=10)
 
         self.btn_full = ctk.CTkButton(self.tabview.tab("Full Download"), text="Download", command=self.download_full)
@@ -107,18 +106,41 @@ class App(ctk.CTk):
         self.entry_url_seg = ctk.CTkEntry(self.tabview.tab("Segment"), placeholder_text="https://www.youtube.com/watch?v=...")
         self.entry_url_seg.pack(pady=5, padx=20, fill="x")
 
-        self.frame_time = ctk.CTkFrame(self.tabview.tab("Segment"), fg_color="transparent")
-        self.frame_time.pack(pady=10, fill="x")
-
-        self.lbl_start = ctk.CTkLabel(self.frame_time, text="Start (HH:MM:SS):")
+        # --- START TIME FRAME ---
+        self.frame_start = ctk.CTkFrame(self.tabview.tab("Segment"), fg_color="transparent")
+        self.frame_start.pack(pady=(10, 5), fill="x")
+        
+        self.lbl_start = ctk.CTkLabel(self.frame_start, text="Start Time:", font=("Arial", 12, "bold"))
         self.lbl_start.pack(side="left", padx=(20, 10))
-        self.entry_start = ctk.CTkEntry(self.frame_time, width=90, placeholder_text="00:00:00")
-        self.entry_start.pack(side="left", padx=5)
+        
+        self.entry_start_h = ctk.CTkEntry(self.frame_start, width=50, placeholder_text="HH")
+        self.entry_start_h.pack(side="left", padx=2)
+        self.lbl_start_colon1 = ctk.CTkLabel(self.frame_start, text=":")
+        self.lbl_start_colon1.pack(side="left")
+        self.entry_start_m = ctk.CTkEntry(self.frame_start, width=50, placeholder_text="MM")
+        self.entry_start_m.pack(side="left", padx=2)
+        self.lbl_start_colon2 = ctk.CTkLabel(self.frame_start, text=":")
+        self.lbl_start_colon2.pack(side="left")
+        self.entry_start_s = ctk.CTkEntry(self.frame_start, width=50, placeholder_text="SS")
+        self.entry_start_s.pack(side="left", padx=2)
 
-        self.lbl_end = ctk.CTkLabel(self.frame_time, text="End (HH:MM:SS):")
-        self.lbl_end.pack(side="left", padx=(30, 10))
-        self.entry_end = ctk.CTkEntry(self.frame_time, width=90, placeholder_text="00:01:00")
-        self.entry_end.pack(side="left", padx=5)
+        # --- END TIME FRAME ---
+        self.frame_end = ctk.CTkFrame(self.tabview.tab("Segment"), fg_color="transparent")
+        self.frame_end.pack(pady=(5, 10), fill="x")
+        
+        self.lbl_end = ctk.CTkLabel(self.frame_end, text="End Time:  ", font=("Arial", 12, "bold"))
+        self.lbl_end.pack(side="left", padx=(20, 10))
+        
+        self.entry_end_h = ctk.CTkEntry(self.frame_end, width=50, placeholder_text="HH")
+        self.entry_end_h.pack(side="left", padx=2)
+        self.lbl_end_colon1 = ctk.CTkLabel(self.frame_end, text=":")
+        self.lbl_end_colon1.pack(side="left")
+        self.entry_end_m = ctk.CTkEntry(self.frame_end, width=50, placeholder_text="MM")
+        self.entry_end_m.pack(side="left", padx=2)
+        self.lbl_end_colon2 = ctk.CTkLabel(self.frame_end, text=":")
+        self.lbl_end_colon2.pack(side="left")
+        self.entry_end_s = ctk.CTkEntry(self.frame_end, width=50, placeholder_text="SS")
+        self.entry_end_s.pack(side="left", padx=2)
 
         self.frame_format_seg = ctk.CTkFrame(self.tabview.tab("Segment"), fg_color="transparent")
         self.frame_format_seg.pack(pady=10, fill="x")
@@ -127,9 +149,9 @@ class App(ctk.CTk):
         self.lbl_format_seg.pack(side="left", padx=(20, 10))
         
         self.format_var_seg = ctk.StringVar(value="mp3")
-        self.radio_mp3_seg = ctk.CTkRadioButton(self.frame_format_seg, text="MP3 (Audio)", variable=self.format_var_seg, value="mp3")
+        self.radio_mp3_seg = ctk.CTkRadioButton(self.frame_format_seg, text="Audio", variable=self.format_var_seg, value="mp3")
         self.radio_mp3_seg.pack(side="left", padx=10)
-        self.radio_mp4_seg = ctk.CTkRadioButton(self.frame_format_seg, text="MP4 (Video)", variable=self.format_var_seg, value="mp4")
+        self.radio_mp4_seg = ctk.CTkRadioButton(self.frame_format_seg, text="Video", variable=self.format_var_seg, value="mp4")
         self.radio_mp4_seg.pack(side="left", padx=10)
 
         self.btn_segment = ctk.CTkButton(self.tabview.tab("Segment"), text="Download Segment", command=self.download_segment)
@@ -149,9 +171,9 @@ class App(ctk.CTk):
         self.lbl_format_pl.pack(side="left", padx=(20, 10))
         
         self.format_var_pl = ctk.StringVar(value="mp3")
-        self.radio_mp3_pl = ctk.CTkRadioButton(self.frame_format_pl, text="MP3 (Audio)", variable=self.format_var_pl, value="mp3")
+        self.radio_mp3_pl = ctk.CTkRadioButton(self.frame_format_pl, text="Audio", variable=self.format_var_pl, value="mp3")
         self.radio_mp3_pl.pack(side="left", padx=10)
-        self.radio_mp4_pl = ctk.CTkRadioButton(self.frame_format_pl, text="MP4 (Video)", variable=self.format_var_pl, value="mp4")
+        self.radio_mp4_pl = ctk.CTkRadioButton(self.frame_format_pl, text="Video", variable=self.format_var_pl, value="mp4")
         self.radio_mp4_pl.pack(side="left", padx=10)
 
         self.btn_playlist = ctk.CTkButton(self.tabview.tab("Playlist"), text="Download Playlist", command=self.download_playlist)
@@ -227,8 +249,16 @@ class App(ctk.CTk):
 
     def download_segment(self):
         url = self.entry_url_seg.get().strip()
-        start = self.entry_start.get().strip()
-        end = self.entry_end.get().strip()
+        
+        start_h = self.entry_start_h.get().strip() or "0"
+        start_m = self.entry_start_m.get().strip() or "0"
+        start_s = self.entry_start_s.get().strip() or "0"
+        end_h = self.entry_end_h.get().strip() or "0"
+        end_m = self.entry_end_m.get().strip() or "0"
+        end_s = self.entry_end_s.get().strip() or "0"
+        
+        start = f"{start_h}:{start_m}:{start_s}"
+        end = f"{end_h}:{end_m}:{end_s}"
 
         if not is_valid_youtube_url(url):
             messagebox.showerror("Invalid URL", "Please enter a valid single YouTube video URL.")
@@ -238,7 +268,7 @@ class App(ctk.CTk):
         end_sec = validate_time(end)
 
         if start_sec is None or end_sec is None:
-            messagebox.showerror("Invalid Time", "Please use HH:MM:SS format.")
+            messagebox.showerror("Invalid Time", "Please enter valid numbers for hours, minutes, and seconds.")
             return
         if start_sec >= end_sec:
             messagebox.showerror("Invalid Time", "Start time must be less than end time.")
@@ -309,7 +339,6 @@ class App(ctk.CTk):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(url, download=True)
                 downloaded_file = ydl.prepare_filename(info_dict)
-                # Adjust extension for the actual output file
                 base_file = downloaded_file.rsplit('.', 1)[0]
                 media_file = f"{base_file}.{ext}"
                 video_title = info_dict.get('title', 'untitled')
@@ -328,7 +357,6 @@ class App(ctk.CTk):
                     .run(capture_stdout=True, capture_stderr=True)
                 )
             else:
-                # Video trim - copy streams for speed, no re-encode
                 (
                     ffmpeg
                     .input(media_file, ss=start_time, to=end_time)
