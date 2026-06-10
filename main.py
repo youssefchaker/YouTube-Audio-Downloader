@@ -8,20 +8,52 @@ import re
 import glob
 import threading
 import sys
+import os
 
 # --- FFMPEG SETUP ---
-if getattr(sys, 'frozen', False):
-    application_path = os.path.dirname(sys.executable)
-else:
-    application_path = os.path.dirname(os.path.abspath(__file__))
+def get_ffmpeg_dir():
+    """Find bundled or local FFmpeg directory."""
+    # Check if running as PyInstaller bundle
+    if getattr(sys, 'frozen', False):
+        # PyInstaller onefile: files are extracted to sys._MEIPASS
+        # PyInstaller onedir: files are next to the executable
+        possible_paths = [
+            sys._MEIPASS if hasattr(sys, '_MEIPASS') else None,  # onefile mode
+            os.path.dirname(sys.executable),  # onedir mode
+        ]
+    else:
+        # Normal Python execution
+        possible_paths = [
+            os.path.dirname(os.path.abspath(__file__)),
+        ]
+    
+    for base_path in possible_paths:
+        if not base_path:
+            continue
+            
+        # Check for ffmpeg.exe directly in the path
+        if os.path.exists(os.path.join(base_path, 'ffmpeg.exe')):
+            return base_path
+            
+        # Check for ffmpeg folder structure (backward compatibility)
+        glob_paths = (
+            glob.glob(os.path.join(base_path, 'ffmpeg-*-essentials_build', 'ffmpeg-*-essentials_build', 'bin')) or
+            glob.glob(os.path.join(base_path, 'ffmpeg-*-essentials_build', 'bin'))
+        )
+        if glob_paths:
+            return glob_paths[0]
+    
+    # Fallback: check if ffmpeg is in system PATH
+    return None
 
-ffmpeg_path = (glob.glob(os.path.join(application_path, 'ffmpeg-*-essentials_build', 'ffmpeg-*-essentials_build', 'bin')) or
-               glob.glob(os.path.join(application_path, 'ffmpeg-*-essentials_build', 'bin')))
+ffmpeg_dir = get_ffmpeg_dir()
 
-if ffmpeg_path:
-    os.environ["PATH"] += os.pathsep + ffmpeg_path[0]
+if ffmpeg_dir:
+    os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+    ffmpeg_path = [ffmpeg_dir]
 else:
-    pass
+    ffmpeg_path = None
+
 
 # --- VALIDATION FUNCTIONS ---
 def is_valid_youtube_url(url):
