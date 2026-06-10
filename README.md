@@ -27,3 +27,6 @@ Download the app release `YouTube_Downloader_v2.0.exe`.
 * Paste your YouTube URL, configure your times (if using the Segment tab), and click **Download**.
 
 All downloaded files will automatically be saved into an `output` folder that the app creates right next to the `.exe`.
+
+### Preview
+<img width="640" height="556" alt="YouTubeDownloader2026-06-1017-43-39-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/d2462cf6-f271-481e-bee0-bffccbae29f4" />
