@@ -28,5 +28,11 @@ Download the app release `YouTube_Downloader_v2.0.exe`.
 
 All downloaded files will automatically be saved into an `output` folder that the app creates right next to the `.exe`.
 
+⚠️ There might be a security warning when downloading the application — this is a false positive. To run:
+1. Click "Keep anyway" or "More info" → "Run anyway" in your browser/Windows Defender
+2. If Chrome blocks it, click the arrow next to the download and select "Keep"
+3. You may need to click "More info" in the SmartScreen dialog, then "Run anyway"
+
+
 ### Preview
 <img width="640" height="556" alt="YouTubeDownloader2026-06-1017-43-39-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/d2462cf6-f271-481e-bee0-bffccbae29f4" />

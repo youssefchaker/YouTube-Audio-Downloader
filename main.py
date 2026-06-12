@@ -9,6 +9,7 @@ import glob
 import threading
 import sys
 import os
+import tkinter as tk
 
 # --- FFMPEG SETUP ---
 def get_ffmpeg_dir():
@@ -89,9 +90,22 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("YouTube Downloader")
-        self.geometry("600x520") 
+        self.geometry("600x425") 
+        self.resizable(False, False)
         ctk.set_appearance_mode("System")
         ctk.set_default_color_theme("blue")
+        
+        if getattr(sys, 'frozen', False):
+            icon_path = os.path.join(sys._MEIPASS, 'app_icon.ico')
+        else:
+            icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app_icon.ico')
+        
+        if os.path.exists(icon_path):
+            try:
+                self.iconbitmap(icon_path)
+            except Exception:
+                pass 
+        
 
         if not ffmpeg_path:
             messagebox.showerror("Error", "FFMPEG path not found.\nPlease make sure ffmpeg is extracted in the root directory.")
@@ -222,10 +236,67 @@ class App(ctk.CTk):
         self.progress_bar.pack(fill="x")
         self.progress_bar.set(0)
 
+        for entry in [
+            self.entry_url_full,
+            self.entry_url_seg,
+            self.entry_url_pl,
+        ]:
+            self.setup_context_menu(entry)
+
     # --- UI HELPERS ---
     def update_progress(self, percent, text="Downloading..."):
         self.after(0, self.progress_bar.set, percent)
         self.after(0, self.lbl_progress.configure, text=text)
+
+    def setup_context_menu(self, widget):
+        """Attach a right-click Cut/Copy/Paste/Select All menu to a CTkEntry."""
+        menu = tk.Menu(self, tearoff=0, bg="#2b2b2b", fg="white",
+                       activebackground="#3b3b3b", activeforeground="white",
+                       borderwidth=0, font=("Roboto", 12))
+        menu.add_command(label="Cut", command=lambda: self.cut_text(widget))
+        menu.add_command(label="Copy", command=lambda: self.copy_text(widget))
+        menu.add_command(label="Paste", command=lambda: self.paste_text(widget))
+        menu.add_separator()
+        menu.add_command(label="Select All", command=lambda: self.select_all(widget))
+
+        def show_menu(event):
+            widget.focus_set()
+            menu.post(event.x_root, event.y_root)
+            menu.grab_release()
+
+        widget.bind("<Button-3>", show_menu)
+        widget.bind("<Button-2>", show_menu)
+
+    def cut_text(self, widget):
+        try:
+            entry = widget._entry if hasattr(widget, '_entry') else widget
+            text = entry.selection_get()
+            self.clipboard_clear()
+            self.clipboard_append(text)
+            entry.delete("sel.first", "sel.last")
+        except tk.TclError:
+            pass
+
+    def copy_text(self, widget):
+        try:
+            entry = widget._entry if hasattr(widget, '_entry') else widget
+            text = entry.selection_get()
+            self.clipboard_clear()
+            self.clipboard_append(text)
+        except tk.TclError:
+            pass
+
+    def paste_text(self, widget):
+        try:
+            text = self.clipboard_get()
+            entry = widget._entry if hasattr(widget, '_entry') else widget
+            entry.insert("insert", text)
+        except tk.TclError:
+            pass
+
+    def select_all(self, widget):
+        widget.select_range(0, "end")
+        widget.icursor("end")
 
     def toggle_buttons(self, state):
         mode = "normal" if state else "disabled"
@@ -422,15 +493,18 @@ class App(ctk.CTk):
                 playlist_output_dir = os.path.join(output_dir, sanitized_playlist_title)
 
             os.makedirs(playlist_output_dir, exist_ok=True)
-            total_videos = len(info_dict.get('entries', []))
+            
+            entries = [e for e in info_dict.get('entries', []) if e and e.get('id')]
+            total_videos = len(entries)
 
             completed_videos = 0
             def playlist_hook(d):
                 nonlocal completed_videos
                 if d['status'] == 'finished':
                     completed_videos += 1
-                    percent = completed_videos / total_videos
-                    self.update_progress(percent, f"Downloaded {completed_videos} of {total_videos}...")
+                    display_completed = min(completed_videos, total_videos)
+                    percent = display_completed / total_videos if total_videos > 0 else 0
+                    self.update_progress(percent, f"Downloaded {display_completed} of {total_videos} videos...")
 
             ydl_opts = self.get_ydl_opts(
                 os.path.join(playlist_output_dir, f"%(title)s.{ext}"),

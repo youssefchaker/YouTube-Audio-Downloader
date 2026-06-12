@@ -12,3 +12,5 @@ dist/
 .venv/
 output/
 ffmpeg.exe
+app_icon.ico
+app_icon.png
